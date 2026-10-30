@@ -13,8 +13,7 @@ python3 server.py
 Open [http://127.0.0.1:4173](http://127.0.0.1:4173). The server creates `northstar.sqlite3` locally on first run.
 
 Live demo: [nurticoder.github.io/northstar](https://nurticoder.github.io/northstar/)
-
-Live demo: [nurticoder.github.io/northstar](https://nurticoder.github.io/northstar/)
+GitHub Pages hosts the static demo shell. Run `python3 server.py` for the full local experience with SQLite accounts and saved adaptive practice attempts.
 
 ## Included
 

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Northstar is a student-led admissions studio for test prep, essays, activities, and university strategy."
+    />
+    <title>Northstar — build the route that fits you</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!--
+      THESIS: Northstar turns the admissions process into a living route, not a pile of disconnected tasks.
+      OWN-WORLD: Ink navy, signal coral, moss green, and paper-white form a field-notebook system with precise data accents.
+      STORY: A student sees their narrative, next move, and strongest evidence in one glance, then acts.
+      FIRST VIEWPORT: A rail-led dashboard opens on the route map, today's next move, and a compact story signal.
+      FORM: Operate-first dashboard with a narrative-planning staging; chosen for scanability over the category-default hero landing page.
+    -->
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">✦</div>
+          <div>
+            <div class="brand-name">northstar</div>
+            <div class="brand-caption">admissions, with intent</div>
+          </div>
+        </div>
+
+        <div class="profile-chip">
+          <div class="avatar">AM</div>
+          <div>
+            <strong>Alex Morgan</strong>
+            <span>Class of 2027 · Singapore</span>
+          </div>
+          <button class="icon-button" title="Profile settings" aria-label="Profile settings">•••</button>
+        </div>
+
+        <nav class="nav-list" id="nav-list">
+          <button class="nav-item active" data-view="overview"><span>◒</span> Overview</button>
+          <button class="nav-item" data-view="story"><span>◎</span> My story</button>
+          <button class="nav-item" data-view="sat"><span>⌁</span> SAT studio</button>
+          <button class="nav-item" data-view="essays"><span>◌</span> Essays</button>
+          <button class="nav-item" data-view="activities"><span>↗</span> Activities</button>
+          <button class="nav-item" data-view="universities"><span>⌂</span> Universities</button>
+          <button class="nav-item" data-view="calendar"><span>▦</span> Calendar</button>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="signal-card">
+            <div class="signal-topline"><span class="status-dot"></span> Your route signal</div>
+            <strong>Clear, but not finished.</strong>
+            <p>Your strongest thread is the way you turn messy systems into useful ones.</p>
+            <button class="text-button" data-view-target="story">See the evidence <span>→</span></button>
+          </div>
+          <button class="nav-item quiet" data-view="settings"><span>⚙</span> Settings</button>
+          <div class="sidebar-footer">Private by default · Data stays in this browser</div>
+        </div>
+      </aside>
+
+      <section class="content">
+        <header class="topbar">
+          <div class="mobile-brand"><div class="brand-mark">✦</div><span>northstar</span></div>
+          <div class="topbar-actions">
+            <button class="topbar-link" id="command-button"><span>⌘ K</span> Quick jump</button>
+            <button class="notification-button" title="Notifications" aria-label="Notifications">♢<i></i></button>
+            <button class="top-avatar">AM</button>
+          </div>
+        </header>
+
+        <div id="view-container"></div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="modal-backdrop" id="modal-backdrop" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <button class="modal-close" id="modal-close" aria-label="Close dialog">×</button>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

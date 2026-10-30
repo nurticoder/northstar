@@ -1,0 +1,4 @@
+__pycache__/
+*.py[cod]
+northstar.sqlite3
+.DS_Store

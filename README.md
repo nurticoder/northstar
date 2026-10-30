@@ -7,10 +7,10 @@ Northstar is a self-contained admissions planning prototype for SAT prep, essays
 From this directory:
 
 ```bash
-python3 -m http.server 4173
+python3 server.py
 ```
 
-Open [http://127.0.0.1:4173](http://127.0.0.1:4173).
+Open [http://127.0.0.1:4173](http://127.0.0.1:4173). The server creates `northstar.sqlite3` locally on first run.
 
 Live demo: [nurticoder.github.io/northstar](https://nurticoder.github.io/northstar/)
 
@@ -24,5 +24,10 @@ Live demo: [nurticoder.github.io/northstar](https://nurticoder.github.io/northst
 - University fit recommendations and tags
 - Calendar timeline
 - Browser-local persistence through `localStorage`
+- Local SQLite accounts with PBKDF2 password hashing and secure session cookies
+- Sign in, sign up, sign out, and authenticated practice progress
+- Seeded Northstar-original SAT-style questions for Math and Reading & Writing
+- Adaptive question selection that moves between easy, medium, and hard based on recent attempts
+- `tests/test_server.py` covering auth, question seeding, adaptive selection, and HTTP flows
 
-The copy and seeded records are original product content designed around the requested feature set. They are not a verbatim copy of third-party website text, branding, or proprietary datasets.
+The copy and seeded records are original product content designed around the requested feature set. They are not a verbatim copy of third-party website text, branding, or proprietary datasets. The practice bank intentionally uses original SAT-style items rather than reproducing copyrighted College Board or OnePrep questions.

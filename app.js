@@ -3,12 +3,98 @@ const state = {
   satScore: Number(localStorage.getItem("northstar-sat-score")) || 1320,
   essayDrafts: Number(localStorage.getItem("northstar-essay-drafts")) || 2,
   savedActivities: JSON.parse(localStorage.getItem("northstar-activities") || "[]"),
+  user: null,
+  backendAvailable: false,
+  practiceQuestion: null,
 };
 
 const viewContainer = document.querySelector("#view-container");
 const toast = document.querySelector("#toast");
 const modalBackdrop = document.querySelector("#modal-backdrop");
 const modalContent = document.querySelector("#modal-content");
+
+const fallbackQuestions = [
+  {
+    id: "fallback-math-1",
+    subject: "math",
+    domain: "Algebra",
+    difficulty: "medium",
+    prompt: "A line passes through (2, 9) and (6, 21). Which equation describes the line?",
+    choices: ["y = 2x + 5", "y = 3x + 3", "y = 4x + 1", "y = 6x - 3"],
+    source: "Northstar original",
+  },
+  {
+    id: "fallback-reading-1",
+    subject: "reading",
+    domain: "Expression of ideas",
+    difficulty: "medium",
+    prompt: "The map was visually striking; ______, its labels were too small to help a first-time visitor navigate the station.",
+    choices: ["for example", "however", "similarly", "therefore"],
+    source: "Northstar original",
+  },
+];
+
+async function api(path, options = {}) {
+  const response = await fetch(path, { ...options, headers: { "Content-Type": "application/json", ...(options.headers || {}) } });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || "Request failed");
+  return payload;
+}
+
+async function bootAuth() {
+  try {
+    const payload = await api("/api/session");
+    state.backendAvailable = true;
+    state.user = payload.user;
+    updateAuthChrome();
+    if (!state.user) showLoginModal("login");
+  } catch {
+    state.backendAvailable = false;
+    updateAuthChrome();
+  }
+}
+
+function updateAuthChrome() {
+  const authButton = document.querySelector("#auth-button");
+  const topAvatar = document.querySelector(".top-avatar");
+  if (!authButton) return;
+  authButton.textContent = state.user ? "Sign out" : "Sign in";
+  topAvatar.textContent = state.user ? state.user.email.slice(0, 2).toUpperCase() : "AM";
+}
+
+function showLoginModal(mode = "login", message = "") {
+  const isLogin = mode === "login";
+  openModal(`
+    <p class="eyebrow">Northstar account</p>
+    <h2 id="modal-title">${isLogin ? "Pick up where you left off." : "Create your private workspace."}</h2>
+    <p class="lede">${message || "Your route, attempts, notes, and university decisions stay in your local SQLite account."}</p>
+    <form class="form-grid" id="auth-form">
+      <label>Email<input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
+      <label>Password<input id="auth-password" type="password" minlength="8" autocomplete="${isLogin ? "current-password" : "new-password"}" required placeholder="At least 8 characters" /></label>
+      <button class="button primary" type="submit">${isLogin ? "Sign in →" : "Create account →"}</button>
+      <button class="panel-link" type="button" id="auth-switch">${isLogin ? "Need an account? Create one" : "Already have an account? Sign in"}</button>
+    </form>
+  `);
+  document.querySelector("#auth-switch").addEventListener("click", () => showLoginModal(isLogin ? "signup" : "login"));
+  document.querySelector("#auth-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = event.currentTarget.querySelector("button[type=submit]");
+    button.disabled = true;
+    try {
+      const payload = await api(isLogin ? "/api/login" : "/api/signup", {
+        method: "POST",
+        body: JSON.stringify({ email: document.querySelector("#auth-email").value, password: document.querySelector("#auth-password").value }),
+      });
+      state.user = payload.user;
+      updateAuthChrome();
+      closeModal();
+      showToast(isLogin ? "Welcome back to your route." : "Your Northstar workspace is ready.");
+    } catch (error) {
+      button.disabled = false;
+      showLoginModal(mode, error.message);
+    }
+  });
+}
 
 const iconMap = {
   overview: "◒",
@@ -192,7 +278,15 @@ function satView() {
           <div class="panel-head"><div><p class="eyebrow">Current read</p><h2 class="panel-title">${state.satScore} projected</h2></div><span class="item-status">+80 in 5 weeks</span></div>
           <p class="lede" style="font-size:13px;margin:16px 0 24px">Your reading is ahead of your math. The fastest route up is not “more questions”—it is a tighter error log for linear models and transitions.</p>
           <div class="signal-bars"><div class="bar-row"><span>Reading & Writing</span><div class="bar"><i style="width: 84%;background:var(--navy)"></i></div><em>690</em></div><div class="bar-row"><span>Math</span><div class="bar"><i style="width: 71%;background:var(--coral)"></i></div><em>630</em></div></div>
-          <div class="section-row"><div><h2 style="font-size:20px">Your next set</h2><p>Personalised from the last 3 reviews.</p></div></div>
+          <div class="section-row"><div><h2 style="font-size:20px">Your next set</h2><p>Personalised from the last 3 reviews.</p></div><button class="button secondary" data-action="load-question">Load adaptive question</button></div>
+          ${state.practiceQuestion ? `
+            <div class="practice-question">
+              <div class="practice-meta"><span>${state.practiceQuestion.domain}</span><span>${state.practiceQuestion.difficulty}</span><span>${state.practiceQuestion.source}</span></div>
+              <h3>${state.practiceQuestion.prompt}</h3>
+              <div class="answer-grid">${state.practiceQuestion.choices.map((choice, index) => `<button class="answer-choice" data-answer-index="${index}"><b>${String.fromCharCode(65 + index)}</b>${choice}</button>`).join("")}</div>
+              <p class="micro">Choose an answer to save this attempt and get a worked explanation.</p>
+            </div>
+          ` : ""}
           <div class="list-row"><div><strong>Linear equations in context</strong><span>8 questions · medium · accuracy target 75%</span></div><button class="panel-link" data-action="practice">Practice →</button></div>
           <div class="list-row"><div><strong>Transitions and rhetorical purpose</strong><span>6 questions · hard · accuracy target 85%</span></div><button class="panel-link" data-action="practice">Practice →</button></div>
         </section>
@@ -282,6 +376,9 @@ function bindActions() {
   document.querySelectorAll("[data-action]").forEach((element) => {
     element.addEventListener("click", () => handleAction(element.dataset.action));
   });
+  document.querySelectorAll("[data-answer-index]").forEach((element) => {
+    element.addEventListener("click", () => submitAnswer(Number(element.dataset.answerIndex)));
+  });
   document.querySelectorAll(".tab-button").forEach((button) => {
     button.addEventListener("click", () => {
       document.querySelectorAll(".tab-button").forEach((item) => item.classList.remove("active"));
@@ -291,12 +388,46 @@ function bindActions() {
   });
 }
 
+async function loadQuestion() {
+  try {
+    state.practiceQuestion = state.backendAvailable
+      ? await api("/api/questions/next?subject=math")
+      : fallbackQuestions[Math.floor(Math.random() * fallbackQuestions.length)];
+  } catch (error) {
+    showToast(error.message);
+    return;
+  }
+  render();
+}
+
+async function submitAnswer(selectedAnswer) {
+  if (!state.practiceQuestion) return;
+  if (!state.backendAvailable) {
+    showToast("Demo answer recorded locally. Run server.py to save progress to SQLite.");
+    state.practiceQuestion = null;
+    render();
+    return;
+  }
+  try {
+    const result = await api("/api/attempts", {
+      method: "POST",
+      body: JSON.stringify({ questionId: state.practiceQuestion.id, selectedAnswer }),
+    });
+    showToast(result.correct ? `Correct — ${result.scoreDelta} route points.` : `Not quite — ${result.explanation}`);
+    state.practiceQuestion = null;
+    render();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
 function handleAction(action) {
   if (action === "plan-next") setView("story");
   if (action === "sat-session" || action === "practice") {
     openModal(`<p class="eyebrow">SAT studio</p><h2 id="modal-title">A focused 25-minute set</h2><p class="lede">We’ll start with 8 linear-equation questions, then pause after each miss to name the trap.</p><div class="form-grid"><label>Session intention<input value="Notice the setup before calculating" /></label><button class="button primary" data-action="finish-session">Begin set →</button></div>`);
     bindActions();
   }
+  if (action === "load-question") loadQuestion();
   if (action === "finish-session") { closeModal(); showToast("Session queued — your first set is ready."); }
   if (action === "schedule-sat") { showToast("Three short SAT sessions added to your calendar."); setView("calendar"); }
   if (action === "start-note") {
@@ -353,5 +484,17 @@ document.querySelector("#command-button").addEventListener("click", () => {
   const event = new KeyboardEvent("keydown", { key: "k", metaKey: true });
   document.dispatchEvent(event);
 });
+document.querySelector("#auth-button").addEventListener("click", async () => {
+  if (!state.user) return showLoginModal("login");
+  try {
+    await api("/api/logout", { method: "POST" });
+    state.user = null;
+    updateAuthChrome();
+    showToast("Signed out. Your local workspace is still on disk.");
+  } catch {
+    showToast("Sign out is available when running server.py.");
+  }
+});
 
 render();
+bootAuth();

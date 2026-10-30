@@ -14,6 +14,8 @@ Open [http://127.0.0.1:4173](http://127.0.0.1:4173). The server creates `northst
 
 Live demo: [nurticoder.github.io/northstar](https://nurticoder.github.io/northstar/)
 
+GitHub Pages hosts the static demo shell. Run `python3 server.py` for the full local experience with SQLite accounts and saved adaptive practice attempts.
+
 ## Included
 
 - Desktop-first admissions command center with roadmap, deadlines, and next-best-action planning

@@ -12,6 +12,8 @@ python3 -m http.server 4173
 
 Open [http://127.0.0.1:4173](http://127.0.0.1:4173).
 
+Live demo: [nurticoder.github.io/northstar](https://nurticoder.github.io/northstar/)
+
 ## Included
 
 - Desktop-first admissions command center with roadmap, deadlines, and next-best-action planning
